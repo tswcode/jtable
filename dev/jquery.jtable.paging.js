@@ -1,4 +1,4 @@
-﻿/************************************************************************
+/************************************************************************
 * PAGING extension for jTable                                           *
 *************************************************************************/
 (function ($) {
@@ -82,26 +82,41 @@
         /* Creates bottom panel and adds to the page.
         *************************************************************************/
         _createBottomPanel: function () {
-            this._$bottomPanel = $('<div />')
+            var self = this;
+            
+            self._$bottomPanel = $('<div />')
                 .addClass('jtable-bottom-panel')
-                .insertAfter(this._$table);
+                .insertAfter(self._$table);
 
-            this._jqueryuiThemeAddClass(this._$bottomPanel, 'ui-state-default');
+            var $left  = $('<div />').addClass('jtable-left-area').appendTo(self._$bottomPanel);
+            var $right = $('<div />').addClass('jtable-right-area').appendTo(self._$bottomPanel);
 
-            $('<div />').addClass('jtable-left-area').appendTo(this._$bottomPanel);
-            $('<div />').addClass('jtable-right-area').appendTo(this._$bottomPanel);
+            if(self.options.bootstrap3){
+                self._$bottomPanel.addClass("clearfix");
+                $left.addClass("pull-left");
+                $right.addClass("pull-right");
+            } else {
+                self._jqueryuiThemeAddClass(self._$bottomPanel, 'ui-state-default');
+            }
+            
         },
 
         /* Creates page list area.
         *************************************************************************/
         _createPageListArea: function () {
-            this._$pagingListArea = $('<span></span>')
-                .addClass('jtable-page-list')
-                .appendTo(this._$bottomPanel.find('.jtable-left-area'));
-
-            this._$pageInfoSpan = $('<span></span>')
+            var self = this;
+            if(self.options.bootstrap3){
+                self._$pagingListArea = $('<ul></ul>')
+                    .addClass('jtable-page-list pagination')
+                    .appendTo(self._$bottomPanel.find('.jtable-left-area'));
+            } else {
+                self._$pagingListArea = $('<span></span>')
+                    .addClass('jtable-page-list')
+                    .appendTo(self._$bottomPanel.find('.jtable-left-area'));
+            }
+            self._$pageInfoSpan = $('<span></span>')
                 .addClass('jtable-page-info')
-                .appendTo(this._$bottomPanel.find('.jtable-right-area'));
+                .appendTo(self._$bottomPanel.find('.jtable-right-area'));
         },
 
         /* Creates page list change area.
@@ -129,6 +144,9 @@
 
             //Page size change combobox
             var $pageSizeChangeCombobox = $('<select></select>').appendTo(self._$pageSizeChangeArea);
+            if(self.options.bootstrap3) {
+                $pageSizeChangeCombobox.addClass('form-control')
+            }
 
             //Add page sizes to the combobox
             for (var i = 0; i < self.options.pageSizes.length; i++) {
@@ -149,7 +167,7 @@
         _createGotoPageInput: function () {
             var self = this;
 
-            if (!self.options.gotoPageArea || self.options.gotoPageArea == 'none') {
+            if (!self.options.gotoPageArea || self.options.gotoPageArea === 'none') {
                 return;
             }
 
@@ -162,7 +180,7 @@
             this._$gotoPageArea.append('<span>' + self.options.messages.gotoPageLabel + ': </span>');
 
             //Goto page input
-            if (self.options.gotoPageArea == 'combobox') {
+            if (self.options.gotoPageArea === 'combobox') {
 
                 self._$gotoPageInput = $('<select></select>')
                     .appendTo(this._$gotoPageArea)
@@ -170,6 +188,9 @@
                     .change(function () {
                         self._changePage(parseInt($(this).val()));
                     });
+                if(self.options.bootstrap3) {
+                    self._$gotoPageInput.addClass('form-control')
+                }
                 self._$gotoPageInput.append('<option value="1">1</option>');
 
             } else { //textbox
@@ -177,21 +198,21 @@
                 self._$gotoPageInput = $('<input type="text" maxlength="10" value="' + self._currentPageNo + '" />')
                     .appendTo(this._$gotoPageArea)
                     .keypress(function (event) {
-                        if (event.which == 13) { //enter
+                        if (event.which === 13) { //enter
                             event.preventDefault();
                             self._changePage(parseInt(self._$gotoPageInput.val()));
-                        } else if (event.which == 43) { // +
+                        } else if (event.which === 43) { // +
                             event.preventDefault();
                             self._changePage(parseInt(self._$gotoPageInput.val()) + 1);
-                        } else if (event.which == 45) { // -
+                        } else if (event.which === 45) { // -
                             event.preventDefault();
                             self._changePage(parseInt(self._$gotoPageInput.val()) - 1);
                         } else {
                             //Allow only digits
                             var isValid = (
-                                (47 < event.keyCode && event.keyCode < 58 && event.shiftKey == false && event.altKey == false)
-                                    || (event.keyCode == 8)
-                                    || (event.keyCode == 9)
+                                (47 < event.keyCode && event.keyCode < 58 && event.shiftKey === false && event.altKey === false)
+                                    || (event.keyCode === 8)
+                                    || (event.keyCode === 9)
                             );
 
                             if (!isValid) {
@@ -206,7 +227,7 @@
         /* Refreshes the 'go to page' input.
         *************************************************************************/
         _refreshGotoPageInput: function () {
-            if (!this.options.gotoPageArea || this.options.gotoPageArea == 'none') {
+            if (!this.options.gotoPageArea || this.options.gotoPageArea === 'none') {
                 return;
             }
 
@@ -216,10 +237,10 @@
                 this._$gotoPageArea.show();
             }
 
-            if (this.options.gotoPageArea == 'combobox') {
+            if (this.options.gotoPageArea === 'combobox') {
                 var oldPageCount = this._$gotoPageInput.data('pageCount');
                 var currentPageCount = this._calculatePageCount();
-                if (oldPageCount != currentPageCount) {
+                if (oldPageCount !== currentPageCount) {
                     this._$gotoPageInput.empty();
 
                     //Skip some pages is there are too many pages
@@ -263,7 +284,7 @@
         _setOption: function (key, value) {
             base._setOption.apply(this, arguments);
 
-            if (key == 'pageSize') {
+            if (key === 'pageSize') {
                 this._changePageSize(parseInt(value));
             }
         },
@@ -271,7 +292,7 @@
         /* Changes current page size with given value.
         *************************************************************************/
         _changePageSize: function (pageSize) {
-            if (pageSize == this.options.pageSize) {
+            if (pageSize === this.options.pageSize) {
                 return;
             }
 
@@ -289,7 +310,7 @@
             //if user sets one of the options on the combobox, then select it.
             var $pageSizeChangeCombobox = this._$bottomPanel.find('.jtable-page-size-change select');
             if ($pageSizeChangeCombobox.length > 0) {
-                if (parseInt($pageSizeChangeCombobox.val()) != pageSize) {
+                if (parseInt($pageSizeChangeCombobox.val()) !== pageSize) {
                     var selectedOption = $pageSizeChangeCombobox.find('option[value=' + pageSize + ']');
                     if (selectedOption.length > 0) {
                         $pageSizeChangeCombobox.val(pageSize);
@@ -402,7 +423,7 @@
             var pageCount = this._calculatePageCount();
 
             this._createFirstAndPreviousPageButtons();
-            if (this.options.pageList == 'normal') {
+            if (this.options.pageList === 'normal') {
                 this._createPageNumberButtons(this._calculatePageNumbers(pageCount));
             }
             this._createLastAndNextPageButtons(pageCount);
@@ -412,68 +433,110 @@
         /* Creates and shows previous and first page links.
         *************************************************************************/
         _createFirstAndPreviousPageButtons: function () {
-            var $first = $('<span></span>')
+            var self = this;
+            
+            if(self.options.bootstrap3) {
+                var $first = $('<li></li>').html('<a href="#">&laquo;</a>');
+            } else {
+                var $first = $('<span></span>').html('&lt;&lt;');
+            }
+        
+            $first
                 .addClass('jtable-page-number-first')
-                .html('&lt&lt')
                 .data('pageNumber', 1)
-                .appendTo(this._$pagingListArea);
+                .appendTo(self._$pagingListArea);
 
-            var $previous = $('<span></span>')
+            if(self.options.bootstrap3) {
+                var $previous = $('<li></li>').html('<a href="#">&lsaquo;</a>');
+            } else {
+                var $previous = $('<span></span>').html('&lt;');
+            }
+
+            $previous 
                 .addClass('jtable-page-number-previous')
-                .html('&lt')
-                .data('pageNumber', this._currentPageNo - 1)
-                .appendTo(this._$pagingListArea);
+                .data('pageNumber', self._currentPageNo - 1)
+                .appendTo(self._$pagingListArea);
 
-            this._jqueryuiThemeAddClass($first, 'ui-button ui-state-default', 'ui-state-hover');
-            this._jqueryuiThemeAddClass($previous, 'ui-button ui-state-default', 'ui-state-hover');
+            if(!self.options.bootstrap3) {
+                self._jqueryuiThemeAddClass($first, 'ui-button ui-state-default', 'ui-state-hover');
+                self._jqueryuiThemeAddClass($previous, 'ui-button ui-state-default', 'ui-state-hover');
+            }
 
-            if (this._currentPageNo <= 1) {
+            if (self._currentPageNo <= 1) {
                 $first.addClass('jtable-page-number-disabled');
                 $previous.addClass('jtable-page-number-disabled');
-                this._jqueryuiThemeAddClass($first, 'ui-state-disabled');
-                this._jqueryuiThemeAddClass($previous, 'ui-state-disabled');
+                if(!self.options.bootstrap3) {
+                    self._jqueryuiThemeAddClass($first, 'ui-state-disabled');
+                    self._jqueryuiThemeAddClass($previous, 'ui-state-disabled');
+                } else {
+                    $first.addClass('disabled');
+                    $previous.addClass('disabled');
+                }
             }
         },
 
         /* Creates and shows next and last page links.
         *************************************************************************/
         _createLastAndNextPageButtons: function (pageCount) {
-            var $next = $('<span></span>')
+            var self = this;
+            
+            if(self.options.bootstrap3) {
+                var $next = $('<li></li>').html('<a href="#">&rsaquo;</a>');
+            } else {
+                var $next = $('<span></span>').html('&gt;');
+            }
+            $next
                 .addClass('jtable-page-number-next')
-                .html('&gt')
                 .data('pageNumber', this._currentPageNo + 1)
-                .appendTo(this._$pagingListArea);
-            var $last = $('<span></span>')
+                .appendTo(self._$pagingListArea);
+            
+            if(self.options.bootstrap3) {
+                var $last = $('<li></li>').html('<a href="#">&raquo;</a>');
+            } else {
+                var $last = $('<span></span>').html('&gt;&gt;');
+            }
+            $last
                 .addClass('jtable-page-number-last')
-                .html('&gt&gt')
                 .data('pageNumber', pageCount)
-                .appendTo(this._$pagingListArea);
+                .appendTo(self._$pagingListArea);
 
-            this._jqueryuiThemeAddClass($next, 'ui-button ui-state-default', 'ui-state-hover');
-            this._jqueryuiThemeAddClass($last, 'ui-button ui-state-default', 'ui-state-hover');
+            if(!self.options.bootstrap3) {
+                self._jqueryuiThemeAddClass($next, 'ui-button ui-state-default', 'ui-state-hover');
+                self._jqueryuiThemeAddClass($last, 'ui-button ui-state-default', 'ui-state-hover');
+            }
 
             if (this._currentPageNo >= pageCount) {
                 $next.addClass('jtable-page-number-disabled');
                 $last.addClass('jtable-page-number-disabled');
-                this._jqueryuiThemeAddClass($next, 'ui-state-disabled');
-                this._jqueryuiThemeAddClass($last, 'ui-state-disabled');
+                if(!self.options.bootstrap3) {
+                    self._jqueryuiThemeAddClass($next, 'ui-state-disabled');
+                    self._jqueryuiThemeAddClass($last, 'ui-state-disabled');
+                } else {
+                    $next.addClass('disabled');
+                    $last.addClass('disabled');
+                }
             }
         },
 
         /* Creates and shows page number links for given number array.
         *************************************************************************/
         _createPageNumberButtons: function (pageNumbers) {
+            var self = this;
+            
             var previousNumber = 0;
             for (var i = 0; i < pageNumbers.length; i++) {
                 //Create "..." between page numbers if needed
                 if ((pageNumbers[i] - previousNumber) > 1) {
-                    $('<span></span>')
-                        .addClass('jtable-page-number-space')
-                        .html('...')
-                        .appendTo(this._$pagingListArea);
+                    if(self.options.bootstrap3) {
+                        var $num = $('<li></li>').html('<a href="#">&hellip;</a>');
+                    } else {
+                        var $num = $('<span></span>').html('...');
+                    }
+                    $num.addClass('jtable-page-number-space')
+                        .appendTo(self._$pagingListArea);
                 }
 
-                this._createPageNumberButton(pageNumbers[i]);
+                self._createPageNumberButton(pageNumbers[i]);
                 previousNumber = pageNumbers[i];
             }
         },
@@ -481,17 +544,32 @@
         /* Creates a page number link and adds to paging area.
         *************************************************************************/
         _createPageNumberButton: function (pageNumber) {
-            var $pageNumber = $('<span></span>')
-                .addClass('jtable-page-number')
-                .html(pageNumber)
-                .data('pageNumber', pageNumber)
-                .appendTo(this._$pagingListArea);
-
-            this._jqueryuiThemeAddClass($pageNumber, 'ui-button ui-state-default', 'ui-state-hover');
+            var self = this;
             
-            if (this._currentPageNo == pageNumber) {
+            if(self.options.bootstrap3) {
+                var $pageNumber = $('<li></li>').html('<a href="#">' + pageNumber + '</a>');
+            } else {
+                var $pageNumber = $('<span></span>').html(pageNumber);
+            }
+            $pageNumber
+                .addClass('jtable-page-number')
+                .data('pageNumber', pageNumber)
+                .appendTo(self._$pagingListArea);
+
+            if(!self.options.bootstrap3) {
+                self._jqueryuiThemeAddClass($pageNumber, 'ui-button ui-state-default', 'ui-state-hover');
+            }
+            
+            if (self._currentPageNo === pageNumber) {
                 $pageNumber.addClass('jtable-page-number-active jtable-page-number-disabled');
-                this._jqueryuiThemeAddClass($pageNumber, 'ui-state-active');
+                if(!self.options.bootstrap3) {
+                    self._jqueryuiThemeAddClass($pageNumber, 'ui-state-active');
+                } else {
+                    $pageNumber
+                        .addClass('active')
+                        .html('<a href="#">' + pageNumber + ' <span class="sr-only">(current)</span></a>');
+                }
+                    
             }
         },
 
@@ -499,7 +577,7 @@
         *************************************************************************/
         _calculatePageCount: function () {
             var pageCount = Math.floor(this._totalRecordCount / this.options.pageSize);
-            if (this._totalRecordCount % this.options.pageSize != 0) {
+            if (this._totalRecordCount % this.options.pageSize !== 0) {
                 ++pageCount;
             }
 
@@ -567,7 +645,7 @@
         *************************************************************************/
         _changePage: function (pageNo) {
             pageNo = this._normalizeNumber(pageNo, 1, this._calculatePageCount(), 1);
-            if (pageNo == this._currentPageNo) {
+            if (pageNo === this._currentPageNo) {
                 this._refreshGotoPageInput();
                 return;
             }

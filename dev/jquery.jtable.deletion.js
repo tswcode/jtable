@@ -1,4 +1,4 @@
-﻿/************************************************************************
+/************************************************************************
 * DELETION extension for jTable                                         *
 *************************************************************************/
 (function ($) {
@@ -59,51 +59,109 @@
 
             //Create div element for delete confirmation dialog
             self._$deleteRecordDiv = $('<div><p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span><span class="jtable-delete-confirm-message"></span></p></div>').appendTo(self._$mainContainer);
+            
+            if(self.options.bootstrap3){
+            	/*TODO: Update to DELETE Alert attributes*/
+            	self._$deleteRecordDiv.find("span.ui-icon").attr("class", "glyphicon glyphicon-warning-sign");
+                
+            	var rndID = 'createModal' + Math.floor((Math.random()*10000)+1);
+            	var arBtn = $('<button id="DelRecordDialogSaveButton" type="button" class="btn btn-primary">' + self.options.messages.deleteText + '</button>');
+            	//Bootstrap Modal
+            	self._$deleteRecordDiv.addClass('modal fade').attr('id',rndID).attr('role','dialog').attr('tabindex','-1').attr('aria-hidden','true').attr('aria-labelledby',rndID+'Title');
+            	$('<div />').addClass('modal-dialog')
+            	.append(
+            		$('<div />').addClass('modal-content').append(
+            			$('<div />').addClass('modal-header').append(
+            				'<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' + 
+            				'<h4 class="modal-title" id="'+rndID+'Title">' + self.options.messages.areYouSure + '</h4>')
+            		).append(
+            			$('<div />').addClass('modal-body').append(self._$deleteRecordDiv.find("p"))
+            		).append(
+            			$('<div />').addClass('modal-footer').append(
+            				'<button type="button" class="btn btn-default" data-dismiss="modal">' + self.options.messages.cancel + '</button>'
+            				//+
+        						//'<button id="AddRecordDialogSaveButton" type="button" class="btn btn-primary">' + self.options.messages.save + '</button>'
+            			).append(arBtn)
+            		)
+            	)
+            	.appendTo(self._$deleteRecordDiv);
+            	
+            	self._$deleteRecordDiv.on('hidden.bs.modal', function () {
+                    var $addRecordForm = self._$addRecordDiv.find('form').first();
+                    var $saveButton = $('#DelRecordDialogSaveButton');
+                    self._trigger("formClosed", null, { form: $addRecordForm, formType: 'create' });
+                    self._setEnabledOfDialogButton($saveButton, true, self.options.messages.save);
+                    $addRecordForm.remove();
+				});
+							
+				arBtn.on('click',function(){
+                    //row maybe removed by another source, if so, do nothing
+                    if (self._$deletingRow.hasClass('jtable-row-removed')) {
+                        self._$deleteRecordDiv.modal('hide');
+                        return;
+                    }
 
-            //Prepare dialog
-            self._$deleteRecordDiv.dialog({
-                autoOpen: false,
-                show: self.options.dialogShowEffect,
-                hide: self.options.dialogHideEffect,
-                modal: true,
-                title: self.options.messages.areYouSure,
-                buttons:
-                        [{  //cancel button
-                            text: self.options.messages.cancel,
-                            click: function () {
-                                self._$deleteRecordDiv.dialog("close");
-                            }
-                        }, {//delete button
-                            id: 'DeleteDialogButton',
-                            text: self.options.messages.deleteText,
-                            click: function () {
-                                
-                                //row maybe removed by another source, if so, do nothing
-                                if (self._$deletingRow.hasClass('jtable-row-removed')) {
-                                    self._$deleteRecordDiv.dialog('close');
-                                    return;
-                                }
-
-                                var $deleteButton = $('#DeleteDialogButton');
-                                self._setEnabledOfDialogButton($deleteButton, false, self.options.messages.deleting);
-                                self._deleteRecordFromServer(
-                                    self._$deletingRow,
-                                    function () {
-                                        self._removeRowsFromTableWithAnimation(self._$deletingRow);
-                                        self._$deleteRecordDiv.dialog('close');
-                                    },
-                                    function (message) { //error
-                                        self._showError(message);
-                                        self._setEnabledOfDialogButton($deleteButton, true, self.options.messages.deleteText);
-                                    }
-                                );
-                            }
-                        }],
-                close: function () {
                     var $deleteButton = $('#DeleteDialogButton');
-                    self._setEnabledOfDialogButton($deleteButton, true, self.options.messages.deleteText);
-                }
-            });
+                    self._setEnabledOfDialogButton($deleteButton, false, self.options.messages.deleting);
+                    self._deleteRecordFromServer(
+                        self._$deletingRow,
+                        function () {
+                            self._removeRowsFromTableWithAnimation(self._$deletingRow);
+                            self._$deleteRecordDiv.modal('hide');
+                        },
+                        function (message) { //error
+                            self._showError(message);
+                            self._setEnabledOfDialogButton($deleteButton, true, self.options.messages.deleteText);
+                        }
+                    );
+				});
+            }else{
+				//jQuery UI Dialog
+	            //Prepare dialog
+	            self._$deleteRecordDiv.dialog({
+	                autoOpen: false,
+	                show: self.options.dialogShowEffect,
+	                hide: self.options.dialogHideEffect,
+	                modal: true,
+	                title: self.options.messages.areYouSure,
+	                buttons:
+	                        [{  //cancel button
+	                            text: self.options.messages.cancel,
+	                            click: function () {
+	                                self._$deleteRecordDiv.dialog("close");
+	                            }
+	                        }, {//delete button
+	                            id: 'DeleteDialogButton',
+	                            text: self.options.messages.deleteText,
+	                            click: function () {
+	                                
+	                                //row maybe removed by another source, if so, do nothing
+	                                if (self._$deletingRow.hasClass('jtable-row-removed')) {
+	                                    self._$deleteRecordDiv.dialog('close');
+	                                    return;
+	                                }
+	
+	                                var $deleteButton = $('#DeleteDialogButton');
+	                                self._setEnabledOfDialogButton($deleteButton, false, self.options.messages.deleting);
+	                                self._deleteRecordFromServer(
+	                                    self._$deletingRow,
+	                                    function () {
+	                                        self._removeRowsFromTableWithAnimation(self._$deletingRow);
+	                                        self._$deleteRecordDiv.dialog('close');
+	                                    },
+	                                    function (message) { //error
+	                                        self._showError(message);
+	                                        self._setEnabledOfDialogButton($deleteButton, true, self.options.messages.deleteText);
+	                                    }
+	                                );
+	                            }
+	                        }],
+	                close: function () {
+	                    var $deleteButton = $('#DeleteDialogButton');
+	                    self._setEnabledOfDialogButton($deleteButton, true, self.options.messages.deleteText);
+	                }
+	            });
+	          }
         },
 
         /************************************************************************
@@ -126,7 +184,7 @@
             }
 
             //Deleting just one row
-            if ($rows.length == 1) {
+            if ($rows.length === 1) {
                 self._deleteRecordFromServer(
                     $rows,
                     function () { //success
@@ -199,13 +257,13 @@
                 error: function () { }
             }, options);
 
-            if (options.key == undefined) {
+            if (typeof options.key === "undefined") {
                 self._logWarn('options parameter in deleteRecord method must contain a key property.');
                 return;
             }
 
             var $deletingRow = self.getRowByKey(options.key);
-            if ($deletingRow == null) {
+            if ($deletingRow === null) {
                 self._logWarn('Can not found any row by key: ' + options.key);
                 return;
             }
@@ -238,7 +296,7 @@
         *************************************************************************/
         _addColumnsToHeaderRow: function ($tr) {
             base._addColumnsToHeaderRow.apply(this, arguments);
-            if (this.options.actions.deleteAction != undefined) {
+            if (typeof this.options.actions.deleteAction !== undefined) {
                 $tr.append(this._createEmptyCommandHeader());
             }
         },
@@ -249,8 +307,13 @@
             base._addCellsToRowUsingRecord.apply(this, arguments);
 
             var self = this;
-            if (self.options.actions.deleteAction != undefined) {
-                var $span = $('<span></span>').html(self.options.messages.deleteText);
+            if (typeof self.options.actions.deleteAction !== undefined) {
+                var $span = $('<span></span>');
+                if(self.options.bootstrap3){
+                    $span.addClass("glyphicon glyphicon-trash");
+                } else {
+                    $span.html(self.options.messages.deleteText);
+                }
                 var $button = $('<button title="' + self.options.messages.deleteText + '"></button>')
                     .addClass('jtable-command-button jtable-delete-command-button')
                     .append($span)
@@ -259,6 +322,9 @@
                         e.stopPropagation();
                         self._deleteButtonClickedForRow($row);
                     });
+                if(self.options.bootstrap3){
+                    $button.addClass("btn btn-danger");
+                }
                 $('<td></td>')
                     .addClass('jtable-command-column')
                     .append($button)
@@ -300,7 +366,7 @@
                 deleteConfirm = self.options.deleteConfirmation;
             }
 
-            if (deleteConfirm != false) {
+            if (deleteConfirm !== false) {
                 //Confirmation
                 self._$deleteRecordDiv.find('.jtable-delete-confirm-message').html(deleteConfirmMessage);
                 self._showDeleteDialog($row);
@@ -321,8 +387,14 @@
         /* Shows delete comfirmation dialog.
         *************************************************************************/
         _showDeleteDialog: function ($row) {
-            this._$deletingRow = $row;
-            this._$deleteRecordDiv.dialog('open');
+            var self = this;
+        
+            self._$deletingRow = $row;
+            if(self.options.bootstrap3){
+            	self._$deleteRecordDiv.modal('show');
+            } else {
+                self._$deleteRecordDiv.dialog('open');
+            }
         },
 
         /* Performs an ajax call to server to delete record
@@ -332,7 +404,7 @@
             var self = this;
 
             //Check if it is already being deleted right now
-            if ($row.data('deleting') == true) {
+            if ($row.data('deleting') === true) {
                 return;
             }
 
@@ -346,7 +418,7 @@
                 data: postData,
                 success: function (data) { 
                     
-                    if (data.Result != 'OK') {
+                    if (data.Result !== 'OK') {
                         $row.data('deleting', false);
                         if (error) {
                             error(data.Message);
@@ -375,7 +447,7 @@
         _removeRowsFromTableWithAnimation: function ($rows, animationsEnabled) {
             var self = this;
 
-            if (animationsEnabled == undefined) {
+            if (typeof animationsEnabled === "undefined") {
                 animationsEnabled = self.options.animationsEnabled;
             }
 

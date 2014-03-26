@@ -1,4 +1,4 @@
-﻿/************************************************************************
+/************************************************************************
 * FORMS extension for jTable (base for edit/create forms)               *
 *************************************************************************/
 (function ($) {
@@ -25,15 +25,30 @@
         /* Creates label for an input element.
         *************************************************************************/
         _createInputLabelForRecordField: function (fieldName) {
+        	if(this.options.bootstrap3) {
+		      	var $l = $('<label />')
+                        .attr('for','Edit-'+fieldName)
+                        .addClass("control-label col-lg-4")
+                        .html(this.options.fields[fieldName].inputTitle || this.options.fields[fieldName].title);
+              
+            if(this.options.fields[fieldName].bs3LabelClass !== '' && typeof(this.options.fields[fieldName].bs3LabelClass) !== 'undefined'){
+            	$l.addClass(this.options.fields[fieldName].bs3LabelClass);
+            }
+              
+            return $l;
+          }else{
             //TODO: May create label tag instead of a div.
             return $('<div />')
                 .addClass('jtable-input-label')
                 .html(this.options.fields[fieldName].inputTitle || this.options.fields[fieldName].title);
+          }
         },
 
         /* Creates an input element according to field type.
         *************************************************************************/
         _createInputForRecordField: function (funcParams) {
+            var self = this;
+            
             var fieldName = funcParams.fieldName,
                 value = funcParams.value,
                 record = funcParams.record,
@@ -41,10 +56,10 @@
                 form = funcParams.form;
 
             //Get the field
-            var field = this.options.fields[fieldName];
+            var field = self.options.fields[fieldName];
 
             //If value if not supplied, use defaultValue of the field
-            if (value == undefined || value == null) {
+            if (typeof value === undefined || value === null) {
                 value = field.defaultValue;
             }
 
@@ -63,34 +78,51 @@
                 }
 
                 //Wrap input element with div
-                return $('<div />')
+                var $iDiv = $('<div />')
                     .addClass('jtable-input jtable-custom-input')
                     .append($input);
+                
+                if(self.options.bs3UseFormGroup){
+                	$iDiv.addClass('form-group');
+                }
+                
+                return $iDiv;
             }
 
             //Create input according to field type
-            if (field.type == 'date') {
-                return this._createDateInputForField(field, fieldName, value);
-            } else if (field.type == 'textarea') {
-                return this._createTextAreaForField(field, fieldName, value);
-            } else if (field.type == 'password') {
-                return this._createPasswordInputForField(field, fieldName, value);
-            } else if (field.type == 'checkbox') {
-                return this._createCheckboxForField(field, fieldName, value);
+            var $f = null;
+            if (field.type === 'date') {
+                $f = self._createDateInputForField(field, fieldName, value);
+            } else if (field.type === 'textarea') {
+                $f = self._createTextAreaForField(field, fieldName, value);
+            } else if (field.type === 'password') {
+                $f = self._createPasswordInputForField(field, fieldName, value);
+            } else if (field.type === 'checkbox') {
+                $f = self._createCheckboxForField(field, fieldName, value);
             } else if (field.options) {
-                if (field.type == 'radiobutton') {
-                    return this._createRadioButtonListForField(field, fieldName, value, record, formType);
+                if (field.type === 'radiobutton') {
+                    $f = self._createRadioButtonListForField(field, fieldName, value, record, formType);
                 } else {
-                    return this._createDropDownListForField(field, fieldName, value, record, formType, form);
+                    $f = self._createDropDownListForField(field, fieldName, value, record, formType, form);
                 }
             } else {
-                return this._createTextInputForField(field, fieldName, value);
+                $f = self._createTextInputForField(field, fieldName, value);
             }
+            
+            if(this.options.bootstrap3){
+            	if(self.options.fields[fieldName].bs3InputColClass !== '' && typeof(self.options.fields[fieldName].bs3InputColClass) !== 'undefined'){
+            		return $('<div />').addClass(self.options.fields[fieldName].bs3InputColClass).append($f.find('input'));
+            	}else{
+            		return $f.addClass("col-lg-8");
+            	}
+            }else{
+            	return $f;
+          	}
         },
 
         //Creates a hidden input element with given name and value.
         _createInputForHidden: function (fieldName, value) {
-            if (value == undefined) {
+            if (typeof value === "undefined") {
                 value = "";
             }
 
@@ -102,12 +134,39 @@
         *************************************************************************/
         _createDateInputForField: function (field, fieldName, value) {
             var $input = $('<input class="' + field.inputClass + '" id="Edit-' + fieldName + '" type="text" name="' + fieldName + '"></input>');
-            if(value != undefined) {
+            if (typeof value !== "undefined") {
                 $input.val(value);
             }
             
             var displayFormat = field.displayFormat || this.options.defaultDateFormat;
-            $input.datepicker({ dateFormat: displayFormat });
+            
+            //Add DatePicker
+            if(this.options.bootstrap3){
+            	$input.addClass('datepicker'); //.css('z-index','2000').css('position','relative');
+            	$input.datepicker({ 
+            		format: displayFormat,
+            		weekStart:this.options.bs3DPweekStart,
+		            calendarWeeks:this.options.bs3DPcalendarWeeks,
+		            startDate:this.options.bs3DPstartDate,
+		            endDate:this.options.bs3DPendDate,
+		            daysOfWeekDisabled:this.options.bs3DPdaysOfWeekDisabled,
+		            autoclose:this.options.bs3DPautoclose,
+		            startView:this.options.bs3DPstartView,
+		            minViewMode:this.options.bs3DPminViewMode,
+		            todayBtn:this.options.bs3DPtodayBtn,
+		            todayHighlight: this.options.bs3DPtodayHighlight,
+		            clearBtn: this.options.bs3DPclearBtn,
+		            keyboardNavigation: this.options.bs3DPkeyboardNavigation,
+		            language:this.options.bs3DPlanguage,
+		            forceParse:this.options.bs3DPforceParse,
+		            inputs:this.options.bs3DPinputs,
+		            beforeShowDay:this.options.bs3DPbeforeShowDay,
+		            orientation:this.options.bs3DPorientation
+            	});
+            }else{
+            	$input.datepicker({ dateFormat: displayFormat });
+          	}
+          	
             return $('<div />')
                 .addClass('jtable-input jtable-date-input')
                 .append($input);
@@ -117,7 +176,7 @@
         *************************************************************************/
         _createTextAreaForField: function (field, fieldName, value) {
             var $textArea = $('<textarea class="' + field.inputClass + '" id="Edit-' + fieldName + '" name="' + fieldName + '"></textarea>');
-            if (value != undefined) {
+            if (typeof value !== "undefined") {
                 $textArea.val(value);
             }
             
@@ -129,21 +188,31 @@
         /* Creates a standart textbox for a field.
         *************************************************************************/
         _createTextInputForField: function (field, fieldName, value) {
-            var $input = $('<input class="' + field.inputClass + '" id="Edit-' + fieldName + '" type="text" name="' + fieldName + '"></input>');
-            if (value != undefined) {
+            var self = this;
+            var $input = $('<input id="Edit-' + fieldName + '" type="text" name="' + fieldName + '"></input>');
+            
+            if(typeof field.inputClass !== "undefined") {
+                $input.addClass(field.inputClass);
+            }
+            if(self.options.bootstrap3){
+                $input.addClass("form-control");
+            }
+            if (typeof value !== "undefined") {
                 $input.val(value);
             }
             
-            return $('<div />')
+          	var $iDiv = $('<div />')
                 .addClass('jtable-input jtable-text-input')
                 .append($input);
+            
+            return $iDiv;
         },
 
         /* Creates a password input for a field.
         *************************************************************************/
         _createPasswordInputForField: function (field, fieldName, value) {
             var $input = $('<input class="' + field.inputClass + '" id="Edit-' + fieldName + '" type="password" name="' + fieldName + '"></input>');
-            if (value != undefined) {
+            if (typeof value !== "undefined") {
                 $input.val(value);
             }
             
@@ -158,7 +227,7 @@
             var self = this;
 
             //If value is undefined, get unchecked state's value
-            if (value == undefined) {
+            if (typeof value === "undefined") {
                 value = self._getCheckBoxPropertiesForFieldByState(fieldName, false).Value;
             }
 
@@ -169,7 +238,7 @@
             //Create checkbox and check if needed
             var $checkBox = $('<input class="' + field.inputClass + '" id="Edit-' + fieldName + '" type="checkbox" name="' + fieldName + '" />')
                 .appendTo($containerDiv);
-            if (value != undefined) {
+            if (typeof value !== "undefined") {
                 $checkBox.val(value);
             }
 
@@ -195,7 +264,7 @@
             });
 
             //Change checkbox state when clicked to text
-            if (field.setOnTextClick != false) {
+            if (field.setOnTextClick !== false) {
                 $textSpan
                     .addClass('jtable-option-text-clickable')
                     .click(function () {
@@ -242,7 +311,7 @@
         _fillDropDownListWithOptions: function ($select, options, value) {
             $select.empty();
             for (var i = 0; i < options.length; i++) {
-                $('<option' + (options[i].Value == value ? ' selected="selected"' : '') + '>' + options[i].DisplayText + '</option>')
+                $('<option' + (options[i].Value === value ? ' selected="selected"' : '') + '>' + options[i].DisplayText + '</option>')
                     .val(options[i].Value)
                     .appendTo($select);
             }
@@ -288,7 +357,7 @@
                     .addClass('jtable-radio-input')
                     .appendTo($containerDiv);
 
-                var $radioButton = $('<input type="radio" id="Edit-' + fieldName + '-' + i + '" class="' + field.inputClass + '" name="' + fieldName + '"' + ((option.Value == (value + '')) ? ' checked="true"' : '') + ' />')
+                var $radioButton = $('<input type="radio" id="Edit-' + fieldName + '-' + i + '" class="' + field.inputClass + '" name="' + fieldName + '"' + ((option.Value === (value + '')) ? ' checked="true"' : '') + ' />')
                     .val(option.Value)
                     .appendTo($radioButtonDiv);
 
@@ -296,7 +365,7 @@
                     .html(option.DisplayText)
                     .appendTo($radioButtonDiv);
 
-                if (field.setOnTextClick != false) {
+                if (field.setOnTextClick !== false) {
                     $textSpan
                         .addClass('jtable-option-text-clickable')
                         .click(function () {
@@ -319,7 +388,7 @@
         /* Returns true if given field's value must be checked state.
         *************************************************************************/
         _getIsCheckBoxSelectedForFieldByValue: function (fieldName, value) {
-            return (this._createCheckBoxStateArrayForFieldWithCaching(fieldName)[1].Value.toString() == value.toString());
+            return (this._createCheckBoxStateArrayForFieldWithCaching(fieldName)[1].Value.toString() === value.toString());
         },
 
         /* Gets an object for a checkbox field that has Value and DisplayText
@@ -414,7 +483,7 @@
                 var field = this.options.fields[fieldName];
 
                 //Do not update non-editable fields
-                if (field.edit == false) {
+                if (field.edit === false) {
                     continue;
                 }
 
@@ -425,7 +494,7 @@
                 }
 
                 //Update field in record according to it's type
-                if (field.type == 'date') {
+                if (field.type === 'date') {
                     var dateVal = $inputElement.val();
                     if (dateVal) {
                         var displayFormat = field.displayFormat || this.options.defaultDateFormat;
@@ -441,7 +510,7 @@
                         this._logDebug('Date is empty for ' + fieldName);
                         record[fieldName] = undefined; //TODO: undefined, null or empty string?
                     }
-                } else if (field.options && field.type == 'radiobutton') {
+                } else if (field.options && field.type === 'radiobutton') {
                     var $checkedElement = $inputElement.filter(':checked');
                     if ($checkedElement.length) {
                         record[fieldName] = $checkedElement.val();
@@ -461,7 +530,7 @@
                 return;
             }
 
-            if (enabled != false) {
+            if (enabled !== false) {
                 $button
                     .removeAttr('disabled')
                     .removeClass('ui-state-disabled');
@@ -472,9 +541,11 @@
             }
 
             if (buttonText) {
-                $button
-                    .find('span')
-                    .text(buttonText);
+            	if ($button.has('span').length) {
+                $button.find('span').text(buttonText);
+              }else{
+              	$button.text(buttonText);
+              }
             }
         }
 

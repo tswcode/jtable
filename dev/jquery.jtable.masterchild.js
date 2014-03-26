@@ -1,4 +1,4 @@
-﻿/************************************************************************
+/************************************************************************
 * MASTER/CHILD tables extension for jTable                              *
 *************************************************************************/
 (function ($) {
@@ -28,12 +28,12 @@
             var self = this;
 
             //Apply theming as same as parent table unless explicitily set
-            if (tableOptions.jqueryuiTheme == undefined) {
+            if (tableOptions.jqueryuiTheme === undefined) {
                 tableOptions.jqueryuiTheme = self.options.jqueryuiTheme;
             }
 
             //Show close button as default
-            tableOptions.showCloseButton = (tableOptions.showCloseButton != false);
+            tableOptions.showCloseButton = (tableOptions.showCloseButton !== false);
 
             //Close child table when close button is clicked (default behavior)
             if (tableOptions.showCloseButton && !tableOptions.closeRequested) {
@@ -135,7 +135,7 @@
         _removeRowsFromTable: function ($rows, reason) {
             var self = this;
 
-            if (reason == 'deleted') {
+            if (reason === 'deleted') {
                 $rows.each(function () {
                     var $row = $(this);
                     var $childRow = $row.data('childRow');

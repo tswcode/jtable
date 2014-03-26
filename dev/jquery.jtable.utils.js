@@ -1,4 +1,4 @@
-﻿/************************************************************************
+/************************************************************************
 * Some UTULITY methods used by jTable                                   *
 *************************************************************************/
 (function ($) {
@@ -44,7 +44,7 @@
             //If not defined, use default comparision
             if (!compareFunc) {
                 compareFunc = function (a, b) {
-                    return a == b;
+                    return a === b;
                 };
             }
 
@@ -61,7 +61,7 @@
         *  if it is undefined
         *************************************************************************/
         _normalizeNumber: function (number, min, max, defaultValue) {
-            if (number == undefined || number == null || isNaN(number)) {
+            if (typeof number === "undefined" || number === null || isNaN(number)) {
                 return defaultValue;
             }
 
@@ -81,7 +81,7 @@
         *  _formatString('Hello {0}','Halil') = 'Hello Halil'
         *************************************************************************/
         _formatString: function () {
-            if (arguments.length == 0) {
+            if (arguments.length === 0) {
                 return null;
             }
 

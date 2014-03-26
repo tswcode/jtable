@@ -1,4 +1,4 @@
-﻿/************************************************************************
+/************************************************************************
 * DYNAMIC COLUMNS extension for jTable                                  *
 * (Show/hide/resize columns)                                            *
 *************************************************************************/
@@ -76,12 +76,13 @@
             var $headerCell = base._createHeaderCellForField.apply(this, arguments);
 
             //Make data columns resizable except the last one
-            if (this.options.columnResizable && field.columnResizable && (fieldName != this._columnList[this._columnList.length - 1])) {
+            if (this.options.columnResizable && field.columnResizable && 
+                    (fieldName !== this._columnList[this._columnList.length - 1])) {
                 this._makeColumnResizable($headerCell);
             }
 
             //Hide column if needed
-            if (field.visibility == 'hidden') {
+            if (field.visibility === 'hidden') {
                 $headerCell.hide();
             }
 
@@ -94,7 +95,7 @@
             var $column = base._createCellForRecordField.apply(this, arguments);
 
             var field = this.options.fields[fieldName];
-            if (field.visibility == 'hidden') {
+            if (field.visibility === 'hidden') {
                 $column.hide();
             }
 
@@ -137,17 +138,17 @@
 
             //Get the field
             var field = this.options.fields[columnName];
-            if (field.visibility == visibility) {
+            if (field.visibility === visibility) {
                 return; //No action if new value is same as old one.
             }
 
             //Hide or show the column if needed
             var columnIndexInTable = this._firstDataColumnOffset + columnIndex + 1;
-            if (field.visibility != 'hidden' && visibility == 'hidden') {
+            if (field.visibility !== 'hidden' && visibility === 'hidden') {
                 this._$table
                     .find('>thead >tr >th:nth-child(' + columnIndexInTable + '),>tbody >tr >td:nth-child(' + columnIndexInTable + ')')
                     .hide();
-            } else if (field.visibility == 'hidden' && visibility != 'hidden') {
+            } else if (field.visibility === 'hidden' && visibility !== 'hidden') {
                 this._$table
                     .find('>thead >tr >th:nth-child(' + columnIndexInTable + '),>tbody >tr >td:nth-child(' + columnIndexInTable + ')')
                     .show()
@@ -234,7 +235,7 @@
                         var $clickedCheckbox = $(this);
                         var clickedColumnName = $clickedCheckbox.attr('name');
                         var clickedField = self.options.fields[clickedColumnName];
-                        if (clickedField.visibility == 'fixed') {
+                        if (clickedField.visibility === 'fixed') {
                             return;
                         }
 
@@ -242,12 +243,12 @@
                     });
 
                 //Check, if column if shown
-                if (field.visibility != 'hidden') {
+                if (field.visibility !== 'hidden') {
                     $checkbox.attr('checked', 'checked');
                 }
 
                 //Disable, if column is fixed
-                if (field.visibility == 'fixed') {
+                if (field.visibility === 'fixed') {
                     $checkbox.attr('disabled', 'disabled');
                 }
             }

@@ -1,4 +1,4 @@
-﻿/************************************************************************
+/************************************************************************
 * SELECTING extension for jTable                                        *
 *************************************************************************/
 (function ($) {
@@ -145,7 +145,7 @@
         /* Overrides base event to check is any selected row is being removed.
         *************************************************************************/
         _onRowsRemoved: function ($rows, reason) {
-            if (this.options.selecting && (reason != 'reloading') && ($rows.filter('.jtable-row-selected').length > 0)) {
+            if (this.options.selecting && (reason !== 'reloading') && ($rows.filter('.jtable-row-selected').length > 0)) {
                 this._onSelectionChanged();
             }
 
@@ -223,7 +223,7 @@
                 }
             }
 
-            if (self._selectedRecordIdsBeforeLoad.length > 0 && self._selectedRecordIdsBeforeLoad.length != selectedRowCount) {
+            if (self._selectedRecordIdsBeforeLoad.length > 0 && self._selectedRecordIdsBeforeLoad.length !== selectedRowCount) {
                 self._onSelectionChanged();
             }
 
@@ -357,10 +357,10 @@
             var totalRowCount = this._$tableRows.length;
             var selectedRowCount = this._getSelectedRows().length;
 
-            if (selectedRowCount == 0) {
+            if (selectedRowCount === 0) {
                 this._$selectAllCheckbox.prop('indeterminate', false);
                 this._$selectAllCheckbox.attr('checked', false);
-            } else if (selectedRowCount == totalRowCount) {
+            } else if (selectedRowCount === totalRowCount) {
                 this._$selectAllCheckbox.prop('indeterminate', false);
                 this._$selectAllCheckbox.attr('checked', true);
             } else {

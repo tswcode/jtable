@@ -1,4 +1,4 @@
-﻿/************************************************************************
+/************************************************************************
 * CORE jTable module                                                    *
 *************************************************************************/
 (function ($) {
@@ -21,6 +21,29 @@
             loadingAnimationDelay: 500,
             saveUserPreferences: true,
             jqueryuiTheme: false,
+            bootstrap3:false, //Do NOT use with jqueryuiTheme: true
+            bs3PanelClass: 'panel-info',
+            bs3FormClass:'horizontal', //Options are '' Default, 'inline' ==> form-inline, 'horizontal' ==> 'form-horizontal' (Option bootstrap3 must be true)
+            bs3UseFormGroup: true, //Adds form-group class to input divs
+            bs3CancelBtnClass:'btn-default',  //Class to add to Cancel/Close buttons
+            bs3OkBtnClass:'btn-primary', //Class to add to Ok/Save buttons
+            bs3DPweekStart:0,
+            bs3DPcalendarWeeks:false,
+            bs3DPstartDate:-Infinity,
+            bs3DPendDate:Infinity,
+            bs3DPdaysOfWeekDisabled:[],
+            bs3DPautoclose:false,
+            bs3DPstartView:0,
+            bs3DPminViewMode:0,
+            bs3DPtodayBtn:false,
+            bs3DPtodayHighlight:false,
+            bs3DPclearBtn:false,
+            bs3DPkeyboardNavigation:true,
+            bs3DPlanguage:'en',
+            bs3DPforceParse:true,
+            bs3DPinputs:null,
+            bs3DPbeforeShowDay:$.noop,
+            bs3DPorientation:'auto',
 
             ajaxSettings: {
                 type: 'POST',
@@ -122,10 +145,10 @@
         /* Normalizes some options for a field (sets default values).
         *************************************************************************/
         _normalizeFieldOptions: function (fieldName, props) {
-            if (props.listClass == undefined) {
+            if (typeof props.listClass !== "undefined") {
                 props.listClass = '';
             }
-            if (props.inputClass == undefined) {
+            if (typeof props.inputClass !== "undefined") {
                 props.inputClass = '';
             }
 
@@ -160,12 +183,12 @@
                 self._fieldList.push(name);
 
                 //Check if this field is the key field
-                if (props.key == true) {
+                if (props.key === true) {
                     self._keyField = name;
                 }
 
                 //Add field to column list if it is shown in the table
-                if (props.list != false && props.type != 'hidden') {
+                if (props.list !== false && props.type !== 'hidden') {
                     self._columnList.push(name);
                 }
             });
@@ -174,11 +197,14 @@
         /* Creates the main container div.
         *************************************************************************/
         _createMainContainer: function () {
+            var self = this;
+            
             this._$mainContainer = $('<div />')
                 .addClass('jtable-main-container')
                 .appendTo(this.element);
 
             this._jqueryuiThemeAddClass(this._$mainContainer, 'ui-widget');
+            this._bootstrap3AddClass(this._$mainContainer, 'panel ' + self.options.bs3PanelClass);
         },
 
         /* Creates title of the table if a title supplied in options.
@@ -195,11 +221,14 @@
                 .appendTo(self._$mainContainer);
 
             self._jqueryuiThemeAddClass($titleDiv, 'ui-widget-header');
+            self._bootstrap3AddClass($titleDiv, 'panel-heading');
 
-            $('<div />')
+            var $titleTextDiv = $('<div />')
                 .addClass('jtable-title-text')
                 .appendTo($titleDiv)
-                .append(self.options.title);
+                .append($('<span class="jtable-title-text-container"/>').html(self.options.title));
+                
+		    self._bootstrap3AddClass($titleTextDiv, 'panel-title');
 
             if (self.options.showCloseButton) {
 
@@ -233,6 +262,7 @@
             }
 
             this._jqueryuiThemeAddClass(this._$table, 'ui-widget-content');
+            this._bootstrap3AddClass(this._$table, 'table table-striped table-bordered table-hover table-condensed');
 
             this._createTableHead();
             this._createTableBody();
@@ -288,7 +318,7 @@
                 .append($headerContainerDiv);
 
             this._jqueryuiThemeAddClass($th, 'ui-state-default');
-
+            
             return $th;
         },
 
@@ -323,21 +353,29 @@
         *************************************************************************/
         _createErrorDialogDiv: function () {
             var self = this;
-
-            self._$errorDialogDiv = $('<div></div>').appendTo(self._$mainContainer);
-            self._$errorDialogDiv.dialog({
-                autoOpen: false,
-                show: self.options.dialogShowEffect,
-                hide: self.options.dialogHideEffect,
-                modal: true,
-                title: self.options.messages.error,
-                buttons: [{
-                    text: self.options.messages.close,
-                    click: function () {
-                        self._$errorDialogDiv.dialog('close');
-                    }
-                }]
-            });
+            
+            if (self.options.bootstrap3) {
+            	self._$errorDialogDiv = $('<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" style="z-index:9999;">' +
+    						'<div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
+          			'<h4 class="modal-title">'+self.options.messages.error+'</h4></div><div class="modal-body"></div><div class="modal-footer"><button type="button" class="btn '+self.options.bs3CancelBtnClass+'" data-dismiss="modal">'+self.options.messages.close+'</button>' + 
+          			'</div></div></div></div>')
+          			.appendTo(self._$mainContainer);
+            }else{
+	            self._$errorDialogDiv = $('<div></div>').appendTo(self._$mainContainer);
+	            self._$errorDialogDiv.dialog({
+	                autoOpen: false,
+	                show: self.options.dialogShowEffect,
+	                hide: self.options.dialogHideEffect,
+	                modal: true,
+	                title: self.options.messages.error,
+	                buttons: [{
+	                    text: self.options.messages.close,
+	                    click: function () {
+	                        self._$errorDialogDiv.dialog('close');
+	                    }
+	                }]
+	            });
+          	}
         },
 
         /************************************************************************
@@ -361,7 +399,7 @@
         *************************************************************************/
         getRowByKey: function (key) {
             for (var i = 0; i < this._$tableRows.length; i++) {
-                if (key == this._getKeyValueOfRecord(this._$tableRows[i].data('record'))) {
+                if (key === this._getKeyValueOfRecord(this._$tableRows[i].data('record'))) {
                     return this._$tableRows[i];
                 }
             }
@@ -408,7 +446,7 @@
                     self._hideBusy();
 
                     //Show the error message if server returns error
-                    if (data.Result != 'OK') {
+                    if (data.Result !== 'OK') {
                         self._showError(data.Message);
                         return;
                     }
@@ -490,11 +528,11 @@
                 index: this._normalizeNumber(index, 0, this._$tableRows.length, this._$tableRows.length)
             };
 
-            if (isNewRow == true) {
+            if (isNewRow === true) {
                 options.isNewRow = true;
             }
 
-            if (animationsEnabled == false) {
+            if (animationsEnabled === false) {
                 options.animationsEnabled = false;
             }
 
@@ -518,11 +556,11 @@
 
             //Add new row to the table according to it's index
             options.index = this._normalizeNumber(options.index, 0, this._$tableRows.length, this._$tableRows.length);
-            if (options.index == this._$tableRows.length) {
+            if (options.index === this._$tableRows.length) {
                 //add as last row
                 this._$tableBody.append($row);
                 this._$tableRows.push($row);
-            } else if (options.index == 0) {
+            } else if (options.index === 0) {
                 //add as first row
                 this._$tableBody.prepend($row);
                 this._$tableRows.unshift($row);
@@ -581,7 +619,7 @@
             self._onRowsRemoved($rows, reason);
 
             //Add 'no data' row if all rows removed from table
-            if (self._$tableRows.length == 0) {
+            if (self._$tableRows.length === 0) {
                 self._addNoDataRow();
             }
 
@@ -592,7 +630,7 @@
         *************************************************************************/
         _findRowIndex: function ($row) {
             return this._findIndexInArray($row, this._$tableRows, function ($row1, $row2) {
-                return $row1.data('record') == $row2.data('record');
+                return $row1.data('record') === $row2.data('record');
             });
         },
 
@@ -645,7 +683,7 @@
         *************************************************************************/
         _refreshRowStyles: function () {
             for (var i = 0; i < this._$tableRows.length; i++) {
-                if (i % 2 == 0) {
+                if (i % 2 === 0) {
                     this._$tableRows[i].addClass('jtable-row-even');
                 } else {
                     this._$tableRows[i].removeClass('jtable-row-even');
@@ -666,9 +704,9 @@
                 return field.display({ record: record });
             }
 
-            if (field.type == 'date') {
+            if (field.type === 'date') {
                 return this._getDisplayTextForDateRecordField(field, fieldValue);
-            } else if (field.type == 'checkbox') {
+            } else if (field.type === 'checkbox') {
                 return this._getCheckBoxTextForFieldByValue(fieldName, fieldValue);
             } else if (field.options) { //combobox or radio button list since there are options.
                 var options = this._getOptionsForField(fieldName, {
@@ -702,7 +740,7 @@
         *************************************************************************/
         _findOptionByValue: function (options, value) {
             for (var i = 0; i < options.length; i++) {
-                if (options[i].Value == value) {
+                if (options[i].Value === value) {
                     return options[i];
                 }
             }
@@ -745,7 +783,7 @@
             var options;
 
             //Build options according to it's source type
-            if (typeof optionsSource == 'string') { //It is an Url to download options
+            if (typeof optionsSource === 'string') { //It is an Url to download options
                 var cacheKey = 'options_' + fieldName + '_' + optionsSource; //create a unique cache key
                 if (funcParams._cacheCleared || (!this._cache[cacheKey])) {
                     //if user calls clearCache() or options are not found in the cache, download options
@@ -755,9 +793,9 @@
                     //found on cache..
                     //if this method (_getOptionsForField) is called to get option for a specific value (on funcParams.source == 'list')
                     //and this value is not in cached options, we need to re-download options to get the unfound (probably new) option.
-                    if (funcParams.value != undefined) {
+                    if (typeof funcParams.value !== "undefined") {
                         var optionForValue = this._findOptionByValue(this._cache[cacheKey], funcParams.value);
-                        if (optionForValue.DisplayText == undefined) { //this value is not in cached options...
+                        if (typeof optionForValue.DisplayText !== "undefined") { //this value is not in cached options...
                             this._cache[cacheKey] = this._buildOptionsFromArray(this._downloadOptions(fieldName, optionsSource));
                             this._sortFieldOptions(this._cache[cacheKey], field.optionsSorting);
                         }
@@ -786,7 +824,7 @@
                 url: url,
                 async: false,
                 success: function (data) {
-                    if (data.Result != 'OK') {
+                    if (data.Result !== 'OK') {
                         self._showError(data.Message);
                         return;
                     }
@@ -813,7 +851,7 @@
 
             //Determine using value of text
             var dataSelector;
-            if (sorting.indexOf('value') == 0) {
+            if (sorting.indexOf('value') === 0) {
                 dataSelector = function (option) {
                     return option.Value;
                 };
@@ -824,7 +862,7 @@
             }
 
             var compareFunc;
-            if ($.type(dataSelector(options[0])) == 'string') {
+            if ($.type(dataSelector(options[0])) === 'string') {
                 compareFunc = function (option1, option2) {
                     return dataSelector(option1).localeCompare(dataSelector(option2));
                 };
@@ -890,13 +928,13 @@
                 return new Date(
                     parseInt(dateString.substr(6), 10)
                 );
-            } else if (dateString.length == 10) { //Format: 2011-01-01
+            } else if (dateString.length === 10) { //Format: 2011-01-01
                 return new Date(
                     parseInt(dateString.substr(0, 4), 10),
                     parseInt(dateString.substr(5, 2), 10) - 1,
                     parseInt(dateString.substr(8, 2), 10)
                 );
-            } else if (dateString.length == 19) { //Format: 2011-01-01 20:32:42
+            } else if (dateString.length === 19) { //Format: 2011-01-01 20:32:42
                 return new Date(
                     parseInt(dateString.substr(0, 4), 10),
                     parseInt(dateString.substr(5, 2), 10) - 1,
@@ -916,36 +954,44 @@
         /* Creates the toolbar.
         *************************************************************************/
         _createToolBar: function () {
-            this._$toolbarDiv = $('<div />')
-            .addClass('jtable-toolbar')
-            .appendTo(this._$titleDiv);
+            var self = this;
+            
+            self._$toolbarDiv = $('<div />')
+            .addClass('jtable-toolbar pull-right')
+            .appendTo(self.options.bootstrap3 ? self._$titleDiv.find('.panel-title') : self._$titleDiv);
 
-            for (var i = 0; i < this.options.toolbar.items.length; i++) {
-                this._addToolBarItem(this.options.toolbar.items[i]);
+            for (var i = 0; i < self.options.toolbar.items.length; i++) {
+                self._addToolBarItem(self.options.toolbar.items[i]);
             }
         },
 
         /* Adds a new item to the toolbar.
         *************************************************************************/
         _addToolBarItem: function (item) {
+            var self = this;
 
             //Check if item is valid
-            if ((item == undefined) || (item.text == undefined && item.icon == undefined)) {
+            if ((typeof item === "undefined") || (typeof item.text === "undefined" && typeof item.icon === "undefined")) {
                 this._logWarn('Can not add tool bar item since it is not valid!');
                 this._logWarn(item);
                 return null;
             }
 
-            var $toolBarItem = $('<span></span>')
-                .addClass('jtable-toolbar-item')
-                .appendTo(this._$toolbarDiv);
-
-            this._jqueryuiThemeAddClass($toolBarItem, 'ui-widget ui-state-default ui-corner-all', 'ui-state-hover');
-
-            //cssClass property
-            if (item.cssClass) {
-                $toolBarItem
-                    .addClass(item.cssClass);
+            if(!self.options.bootstrap3) {
+                var $toolBarItem = $('<span></span>')
+                    .addClass('jtable-toolbar-item')
+                    .appendTo(this._$toolbarDiv);
+                this._jqueryuiThemeAddClass($toolBarItem, 'ui-widget ui-state-default ui-corner-all', 'ui-state-hover');
+                
+                //cssClass property
+                if (item.cssClass) {
+                    $toolBarItem
+                        .addClass(item.cssClass);
+                }
+            } else {
+                var $toolBarItem = $('<button></button>')
+                    .addClass('jtable-toolbar-item navbar-btn btn btn-primary')
+                    .appendTo(this._$toolbarDiv);
             }
 
             //tooltip property
@@ -956,19 +1002,26 @@
 
             //icon property
             if (item.icon) {
-                var $icon = $('<span class="jtable-toolbar-item-icon"></span>').appendTo($toolBarItem);
+                var $icon = $('<span class="jtable-toolbar-item-icon glyphicon"></span>').appendTo($toolBarItem);
                 if (item.icon === true) {
                     //do nothing
-                } else if ($.type(item.icon === 'string')) {
+                } else if (typeof item.icon === 'string') {
                     $icon.css('background', 'url("' + item.icon + '")');
+                }
+                
+                //cssClass property
+                if (self.options.bootstrap3 && item.cssClass) {
+                    $icon.addClass(item.cssClass);
                 }
             }
 
             //text property
-            if (item.text) {
+            if (item.text && !self.options.bootstrap3) {
                 $('<span class=""></span>')
                     .html(item.text)
                     .addClass('jtable-toolbar-item-text').appendTo($toolBarItem);
+            } else {
+                $toolBarItem.attr("title", item.text);
             }
 
             //click event
@@ -1001,7 +1054,13 @@
         /* Shows error message dialog with given message.
         *************************************************************************/
         _showError: function (message) {
+        	if (this.options.bootstrap3) {
+        		this._$errorDialogDiv.find('.modal-body').html(message);
+        		//var xy = this._$errorDialogDiv.modal().data('bs.modal').$backdrop;
+        		this._$errorDialogDiv.modal('show').data('bs.modal').$backdrop.css('z-index','9998');
+        	}else{
             this._$errorDialogDiv.html(message).dialog('open');
+          }
         },
 
         /* BUSY PANEL ***********************************************************/
@@ -1055,6 +1114,24 @@
         *************************************************************************/
         _jqueryuiThemeAddClass: function ($elm, className, hoverClassName) {
             if (!this.options.jqueryuiTheme) {
+                return;
+            }
+
+            $elm.addClass(className);
+
+            if (hoverClassName) {
+                $elm.hover(function () {
+                    $elm.addClass(hoverClassName);
+                }, function () {
+                    $elm.removeClass(hoverClassName);
+                });
+            }
+        },
+        
+        /* Adds bootstrap3 class to an item.
+        *************************************************************************/
+        _bootstrap3AddClass: function ($elm, className, hoverClassName) {
+            if (!this.options.bootstrap3) {
                 return;
             }
 
@@ -1147,7 +1224,7 @@
                 }
 
                 var splitted = equalities[i].split('=');
-                if (splitted.length != 2) {
+                if (splitted.length !== 2) {
                     continue;
                 }
 
@@ -1165,7 +1242,7 @@
 
             var simpleHash = function (value) {
                 var hash = 0;
-                if (value.length == 0) {
+                if (value.length === 0) {
                     return hash;
                 }
 
