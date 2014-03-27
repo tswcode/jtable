@@ -1,0 +1,85 @@
+div.jtable-main-container div.jtable-bottom-panel,
+div.jtable-main-container table.jtable thead th {
+	background-color: #EAEAEA;
+	border-bottom: 1px solid #DEDEDE;
+    border-top: 1px solid #DEDEDE;
+}
+
+div.jtable-main-container div.jtable-bottom-panel {
+    border-top: 1px solid #DEDEDE;
+}
+
+div.jtable-main-container table.jtable thead th {
+	border-bottom: 1px solid #DEDEDE;
+}
+
+div.jtable-main-container table.jtable thead .jtable-sortable-icon {
+    margin-left: 5px;
+}
+
+div.jtable-main-container select {
+	width: auto;
+	padding: 0;
+}
+
+div.jtable-main-container .pagination {
+	margin: 2px;
+}
+
+div.jtable-main-container .pagination,
+div.jtable-main-container .form-control {
+    display: inline;
+}
+
+div.jtable-main-container div.jtable-bottom-panel {
+    padding: 5px 5px 0px 5px;
+    line-height: 3;
+}
+
+div.jtable-main-container div.jtable-title div.jtable-title-text {
+    font-size: 15px;
+}
+
+.jtable-main-container img.avatar-thumb {
+	width: 30px;
+}
+
+.modal-footer {
+    margin-top: 0;
+}
+
+.modal-body p:last-child,
+.modal-body form:last-child,
+.modal-body .form-group:last-child {
+    margin-bottom: 0;
+}
+
+div.jtable-main-container div.jtable-column-resize-bar {
+    opacity: 0.5;
+    filter: alpha(opacity=50);
+    position: absolute;
+    display: none;
+    width: 1px;
+    background-color: #000;
+}
+
+div.jtable-main-container table.jtable thead th.jtable-column-header div.jtable-column-header-container,
+div.jtable-main-container {
+    position: relative;
+}
+
+div.jtable-main-container table.jtable thead th.jtable-column-header div.jtable-column-header-container div.jtable-column-resize-handler {
+    position: absolute;
+    height: 24px;
+    width: 8px;
+    right: -8px;
+    top: -2px;
+    z-index: 2;
+    cursor: col-resize;
+}
+
+div.jtable-main-container div.jtable-bottom-panel span.jtable-goto-page,
+div.jtable-main-container div.jtable-bottom-panel span.jtable-page-size-change {
+    display: inline-block;
+    margin-left: 1em;
+}

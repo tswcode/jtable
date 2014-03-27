@@ -2,6 +2,7 @@
 * CORE jTable module                                                    *
 *************************************************************************/
 (function ($) {
+    var now = new Date();
 
     $.widget("hik.jtable", {
 
@@ -14,7 +15,7 @@
             actions: {},
             fields: {},
             animationsEnabled: true,
-            defaultDateFormat: 'yy-mm-dd',
+            defaultDateFormat: 'mm/dd/y hh:ii:ss',
             dialogShowEffect: 'fade',
             dialogHideEffect: 'fade',
             showCloseButton: false,
@@ -27,6 +28,18 @@
             bs3UseFormGroup: true, //Adds form-group class to input divs
             bs3CancelBtnClass:'btn-default',  //Class to add to Cancel/Close buttons
             bs3OkBtnClass:'btn-primary', //Class to add to Ok/Save buttons
+            
+            useMobiScroll: true,
+            msPreset: "datetime",
+            msMinDate: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
+            msMaxDate: new Date(now.getFullYear() + 2, now .getMonth(), now.getDate()),
+            msStepMinute: 5,
+            msTheme: "android-ics light",
+            msMode: "mixed",
+            msDisplay: "modal",
+            msLang: "de",
+            
+            
             bs3DPweekStart:0,
             bs3DPcalendarWeeks:false,
             bs3DPstartDate:-Infinity,
@@ -44,7 +57,7 @@
             bs3DPinputs:null,
             bs3DPbeforeShowDay:$.noop,
             bs3DPorientation:'auto',
-
+            
             ajaxSettings: {
                 type: 'POST',
                 dataType: 'json'
@@ -757,7 +770,7 @@
 
             var displayFormat = field.displayFormat || this.options.defaultDateFormat;
             var date = this._parseDate(fieldValue);
-            return $.datepicker.formatDate(displayFormat, date);
+            return $.mobiscroll.formatDate(displayFormat, date);
         },
 
         /* Gets options for a field according to user preferences.

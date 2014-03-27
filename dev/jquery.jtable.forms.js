@@ -133,36 +133,55 @@
         /* Creates a date input for a field.
         *************************************************************************/
         _createDateInputForField: function (field, fieldName, value) {
-            var $input = $('<input class="' + field.inputClass + '" id="Edit-' + fieldName + '" type="text" name="' + fieldName + '"></input>');
+            var self = this;
+            
+            var $input = $('<input id="Edit-' + fieldName + '" type="text" name="' + fieldName + '"></input>');
+            if (typeof field.inputClass !== "undefined") {
+                 $input.addClass(field.inputClass);
+            }
             if (typeof value !== "undefined") {
                 $input.val(value);
             }
             
-            var displayFormat = field.displayFormat || this.options.defaultDateFormat;
+            var displayFormat = field.displayFormat || self.options.defaultDateFormat;
             
             //Add DatePicker
-            if(this.options.bootstrap3){
-            	$input.addClass('datepicker'); //.css('z-index','2000').css('position','relative');
-            	$input.datepicker({ 
-            		format: displayFormat,
-            		weekStart:this.options.bs3DPweekStart,
-		            calendarWeeks:this.options.bs3DPcalendarWeeks,
-		            startDate:this.options.bs3DPstartDate,
-		            endDate:this.options.bs3DPendDate,
-		            daysOfWeekDisabled:this.options.bs3DPdaysOfWeekDisabled,
-		            autoclose:this.options.bs3DPautoclose,
-		            startView:this.options.bs3DPstartView,
-		            minViewMode:this.options.bs3DPminViewMode,
-		            todayBtn:this.options.bs3DPtodayBtn,
-		            todayHighlight: this.options.bs3DPtodayHighlight,
-		            clearBtn: this.options.bs3DPclearBtn,
-		            keyboardNavigation: this.options.bs3DPkeyboardNavigation,
-		            language:this.options.bs3DPlanguage,
-		            forceParse:this.options.bs3DPforceParse,
-		            inputs:this.options.bs3DPinputs,
-		            beforeShowDay:this.options.bs3DPbeforeShowDay,
-		            orientation:this.options.bs3DPorientation
-            	});
+            if(self.options.bootstrap3){
+                $input.addClass("form-control");
+                if(self.options.useMobiScroll) {
+                    $input.scroller({
+                      preset: field.msPreset || self.options.msPreset,
+                      minDate: field.msMinDate || self.options.msMinDate,
+                      maxDate: field.msMaxDate || self.options.msMaxDate,
+                      stepMinute: field.msMaxDate || self.options.msStepMinute,
+                      theme: field.msTheme || self.options.msTheme,
+                      mode: field.msMode || self.options.msMode,
+                      display: field.msDisplay || self.options.msDisplay,
+                      lang: field.msLang || self.options.msLang
+                    });
+                } else {
+                    $input.addClass('datepicker'); //.css('z-index','2000').css('position','relative');
+                    $input.datepicker({ 
+                        format: displayFormat,
+                        weekStart:self.options.bs3DPweekStart,
+                        calendarWeeks:self.options.bs3DPcalendarWeeks,
+                        startDate:self.options.bs3DPstartDate,
+                        endDate:self.options.bs3DPendDate,
+                        daysOfWeekDisabled:self.options.bs3DPdaysOfWeekDisabled,
+                        autoclose:self.options.bs3DPautoclose,
+                        startView:self.options.bs3DPstartView,
+                        minViewMode:self.options.bs3DPminViewMode,
+                        todayBtn:self.options.bs3DPtodayBtn,
+                        todayHighlight: self.options.bs3DPtodayHighlight,
+                        clearBtn: self.options.bs3DPclearBtn,
+                        keyboardNavigation: self.options.bs3DPkeyboardNavigation,
+                        language:self.options.bs3DPlanguage,
+                        forceParse:self.options.bs3DPforceParse,
+                        inputs:self.options.bs3DPinputs,
+                        beforeShowDay:self.options.bs3DPbeforeShowDay,
+                        orientation:self.options.bs3DPorientation
+                    });
+                }
             }else{
             	$input.datepicker({ dateFormat: displayFormat });
           	}
@@ -175,9 +194,18 @@
         /* Creates a textarea element for a field.
         *************************************************************************/
         _createTextAreaForField: function (field, fieldName, value) {
-            var $textArea = $('<textarea class="' + field.inputClass + '" id="Edit-' + fieldName + '" name="' + fieldName + '"></textarea>');
+            var self = this;
+            
+            var $textArea = $('<textarea id="Edit-' + fieldName + '" name="' + fieldName + '"></textarea>');
+            if (typeof field.inputClass !== "undefined") {
+                $textArea.addClass(field.inputClass);
+            }
             if (typeof value !== "undefined") {
                 $textArea.val(value);
+            }
+            
+            if(self.options.bootstrap3) {
+                $textArea.addClass("form-control");
             }
             
             return $('<div />')
@@ -211,7 +239,15 @@
         /* Creates a password input for a field.
         *************************************************************************/
         _createPasswordInputForField: function (field, fieldName, value) {
-            var $input = $('<input class="' + field.inputClass + '" id="Edit-' + fieldName + '" type="password" name="' + fieldName + '"></input>');
+            var self = this;
+            var $input = $('<input id="Edit-' + fieldName + '" type="password" name="' + fieldName + '"></input>');
+            
+            if(typeof field.inputClass !== "undefined") {
+                $input.addClass(field.inputClass);
+            }
+            if(self.options.bootstrap3){
+                $input.addClass("form-control");
+            }
             if (typeof value !== "undefined") {
                 $input.val(value);
             }
@@ -225,7 +261,7 @@
         *************************************************************************/
         _createCheckboxForField: function (field, fieldName, value) {
             var self = this;
-
+            
             //If value is undefined, get unchecked state's value
             if (typeof value === "undefined") {
                 value = self._getCheckBoxPropertiesForFieldByState(fieldName, false).Value;
@@ -235,16 +271,34 @@
             var $containerDiv = $('<div />')
                 .addClass('jtable-input jtable-checkbox-input');
 
+            if(self.options.bootstrap3) {
+                var $checkBoxDiv = $('<div class="checkbox" />').appendTo($containerDiv);
+            }
+
             //Create checkbox and check if needed
-            var $checkBox = $('<input class="' + field.inputClass + '" id="Edit-' + fieldName + '" type="checkbox" name="' + fieldName + '" />')
-                .appendTo($containerDiv);
+            var $checkBox = $('<input id="Edit-' + fieldName + '" type="checkbox" name="' + fieldName + '" />');
+            
+            if(self.options.bootstrap3) {
+                $checkBox.appendTo($checkBoxDiv);
+            } else {
+                $checkBox.appendTo($containerDiv);
+            }
+            
+            if(typeof field.inputClass !== "undefined") {
+                $checkBox.addClass(field.inputClass);
+            }
             if (typeof value !== "undefined") {
                 $checkBox.val(value);
             }
 
             //Create display text of checkbox for current state
-            var $textSpan = $('<span>' + (field.formText || self._getCheckBoxTextForFieldByValue(fieldName, value)) + '</span>')
-                .appendTo($containerDiv);
+            var $textSpan = $('<span>' + (field.formText || self._getCheckBoxTextForFieldByValue(fieldName, value)) + '</span>');
+        
+            if(self.options.bootstrap3) {
+                $textSpan.appendTo($checkBoxDiv);
+            } else {
+                $textSpan.appendTo($containerDiv);
+            }
 
             //Check the checkbox if it's value is checked-value
             if (self._getIsCheckBoxSelectedForFieldByValue(fieldName, value)) {
@@ -344,10 +398,11 @@
         /* Creates a radio button list for a field.
         *************************************************************************/
         _createRadioButtonListForField: function (field, fieldName, value, record, source) {
+            var self = this;
             var $containerDiv = $('<div />')
                 .addClass('jtable-input jtable-radiobuttonlist-input');
 
-            var options = this._getOptionsForField(fieldName, {
+            var options = self._getOptionsForField(fieldName, {
                 record: record,
                 source: source
             });
@@ -356,14 +411,30 @@
                 var $radioButtonDiv = $('<div class=""></div>')
                     .addClass('jtable-radio-input')
                     .appendTo($containerDiv);
+            
+                if(self.options.bootstrap3) {
+                   var $radioContainerDiv = $('<div class="radio" />').appendTo($radioButtonDiv);
+                }
 
-                var $radioButton = $('<input type="radio" id="Edit-' + fieldName + '-' + i + '" class="' + field.inputClass + '" name="' + fieldName + '"' + ((option.Value === (value + '')) ? ' checked="true"' : '') + ' />')
-                    .val(option.Value)
-                    .appendTo($radioButtonDiv);
+                var $radioButton = $('<input type="radio" id="Edit-' + fieldName + '-' + i + '" cname="' + fieldName + '"' + ((option.Value === (value + '')) ? ' checked="true"' : '') + ' />')
+                    .val(option.Value);
+                
+                if(self.options.bootstrap3) {
+                    $radioButton.appendTo($radioContainerDiv);
+                } else {
+                    $radioButton.appendTo($radioButtonDiv);
+                }
+            
+                if(typeof field.inputClass !== "undefined") {
+                    $radioButton.addClass(field.inputClass);
+                }
 
-                var $textSpan = $('<span></span>')
-                    .html(option.DisplayText)
-                    .appendTo($radioButtonDiv);
+                var $textSpan = $('<span></span>').html(option.DisplayText);
+                if(self.options.bootstrap3) {
+                    $textSpan.appendTo($radioContainerDiv);
+                } else {
+                    $textSpan.appendTo($radioButtonDiv);
+                }
 
                 if (field.setOnTextClick !== false) {
                     $textSpan
@@ -499,7 +570,7 @@
                     if (dateVal) {
                         var displayFormat = field.displayFormat || this.options.defaultDateFormat;
                         try {
-                            var date = $.datepicker.parseDate(displayFormat, dateVal);
+                            var date = $.mobiscroll.formatDate(displayFormat, dateVal);
                             record[fieldName] = '/Date(' + date.getTime() + ')/';
                         } catch (e) {
                             //TODO: Handle incorrect/different date formats
