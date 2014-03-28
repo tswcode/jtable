@@ -32,12 +32,15 @@ div.jtable-main-container .form-control {
 }
 
 div.jtable-main-container div.jtable-bottom-panel {
-    padding: 5px 5px 0px 5px;
+    padding: 5px 5px 2px 5px;
     line-height: 3;
 }
 
-div.jtable-main-container div.jtable-title div.jtable-title-text {
-    font-size: 15px;
+div.jtable-main-container div.jtable-title span.jtable-title-text-container {
+    font-size: 20px;
+    font-weight: bold;
+    display: inline-block;
+    line-height: 2em;
 }
 
 .jtable-main-container img.avatar-thumb {
@@ -82,4 +85,42 @@ div.jtable-main-container div.jtable-bottom-panel span.jtable-goto-page,
 div.jtable-main-container div.jtable-bottom-panel span.jtable-page-size-change {
     display: inline-block;
     margin-left: 1em;
+}
+
+div.jtable-busy-panel-background {
+  opacity: 0.1;
+  filter: alpha(opacity=50);
+  z-index: 998;
+  position: absolute;
+  background-color: #000;
+}
+div.jtable-busy-panel-background.jtable-busy-panel-background-invisible {
+  background-color: transparent;
+}
+div.jtable-busy-message {
+  cursor: wait;
+  z-index: 999;
+  position: absolute;
+  margin: 5px;
+}
+
+div.jtable-busy-message {
+  -webkit-text-shadow: 0 1px 0 #333333;
+  text-shadow: 0 1px 0 #333333;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  -webkit-box-shadow: 2px 2px 4px rgba(50, 51, 50, 0.75);
+  -moz-box-shadow: 2px 2px 4px rgba(50, 51, 50, 0.75);
+  box-shadow: 2px 2px 4px rgba(50, 51, 50, 0.75);
+  color: #fff;
+  border: 1px solid;
+  padding: 3px 5px 5px 27px;
+  background: url('../images/loading.gif') no-repeat;
+  background-position: 5px;
+}
+
+div.jtable-busy-message {
+  border-color: #2B5177;
+  background-color: #78B1ED;
 }
