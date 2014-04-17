@@ -338,14 +338,22 @@
         /* Creates a drop down list (combobox) input element for a field.
         *************************************************************************/
         _createDropDownListForField: function (field, fieldName, value, record, source, form) {
+            var self = this;
 
             //Create a container div
             var $containerDiv = $('<div />')
                 .addClass('jtable-input jtable-dropdown-input');
 
             //Create select element
-            var $select = $('<select class="' + field.inputClass + '" id="Edit-' + fieldName + '" name="' + fieldName + '"></select>')
+            var $select = $('<select id="Edit-' + fieldName + '" name="' + fieldName + '"></select>')
                 .appendTo($containerDiv);
+            if (typeof field.inputClass !== "undefined") {
+                 $select.addClass(field.inputClass);
+            }
+            
+            if(self.options.bootstrap3) {
+                $select.addClass("form-control");
+            }
 
             //add options
             var options = this._getOptionsForField(fieldName, {
@@ -365,7 +373,7 @@
         _fillDropDownListWithOptions: function ($select, options, value) {
             $select.empty();
             for (var i = 0; i < options.length; i++) {
-                $('<option' + (options[i].Value === value ? ' selected="selected"' : '') + '>' + options[i].DisplayText + '</option>')
+                $('<option' + ("" + options[i].Value === "" + value ? ' selected="selected"' : '') + '>' + options[i].DisplayText + '</option>')
                     .val(options[i].Value)
                     .appendTo($select);
             }

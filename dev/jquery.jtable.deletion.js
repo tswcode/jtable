@@ -409,7 +409,7 @@
             var self = this;
 
             var completeDelete = function(data) {
-                if (data.Result != 'OK') {
+                if (data.Result !== 'OK') {
                     $row.data('deleting', false);
                     if (error) {
                         error(data.Message);
@@ -446,10 +446,10 @@
                     //Wait promise
                     funcResult.done(function (data) {
                         completeDelete(data);
-                    }).fail(function () {
+                    }).fail(function (data) {
                         $row.data('deleting', false);
                         if (error) {
-                            error(self.options.messages.serverCommunicationError);
+                            error(self.options.messages.serverCommunicationError, data);
                         }
                     });
                 } else { //assume it returned the deletion result
@@ -464,10 +464,10 @@
                     success: function (data) {
                         completeDelete(data);
                     },
-                    error: function () {
+                    error: function (data) {
                         $row.data('deleting', false);
                         if (error) {
-                            error(self.options.messages.serverCommunicationError);
+                            error(self.options.messages.serverCommunicationError, data);
                         }
                     }
                 });

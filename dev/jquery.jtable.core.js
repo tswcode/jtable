@@ -92,6 +92,7 @@
             //Localization
             messages: {
                 serverCommunicationError: 'An error occured while communicating to the server.',
+                errorDetails: 'Error details',
                 loadingMessage: 'Loading records...',
                 noDataAvailable: 'No data available!',
                 areYouSure: 'Are you sure?',
@@ -457,7 +458,7 @@
                 self._hideBusy();
 
                 //Show the error message if server returns error
-                if (data.Result != 'OK') {
+                if (data.Result !== 'OK') {
                     self._showError(data.Message);
                     return;
                 }
@@ -487,8 +488,9 @@
                 if (self._isDeferredObject(funcResult)) {
                     funcResult.done(function(data) {
                         completeReload(data);
-                    }).fail(function() {
-                        self._showError(self.options.messages.serverCommunicationError);
+                    }).fail(function(data) {
+                        console.info(data);
+                        self._showError(self.options.messages.serverCommunicationError, data);
                     }).always(function() {
                         self._hideBusy();
                     });
@@ -508,9 +510,9 @@
                     success: function (data) {
                         completeReload(data);
                     },
-                    error: function () {
+                    error: function(data) {
                         self._hideBusy();
-                        self._showError(self.options.messages.serverCommunicationError);
+                        self._showError(self.options.messages.serverCommunicationError, data);
                     }
                 });
 
@@ -885,7 +887,7 @@
 
                     options = data.Options;
                 },
-                error: function () {
+                error: function (data) {
                     var errMessage = self._formatString(self.options.messages.cannotLoadOptionsFor, fieldName);
                     self._showError(errMessage);
                 }
@@ -1115,7 +1117,17 @@
 
         /* Shows error message dialog with given message.
         *************************************************************************/
-        _showError: function (message) {
+        _showError: function (message, data) {
+            var self = this;
+            if(typeof data !== "undefined") {
+                console.info(data);
+                message += '<br/><br/>';
+                message += '<h5>' + self.options.messages.errorDetails + '</h5>';
+                message += '<dl class="dl-horizontal">'+
+                        '<dt>' + data[0].status + '</dt><dd>' + data[0].statusText + '</dd>' +
+                        '<dt>Response</dt><dd>' + data[0].responseText.replace(/\<br ?\/?\>/g, "") + '</dd>' +
+                        '</dl>';
+            }
         	if (this.options.bootstrap3) {
         		this._$errorDialogDiv.find('.modal-body').html(message);
         		//var xy = this._$errorDialogDiv.modal().data('bs.modal').$backdrop;
@@ -1252,7 +1264,7 @@
             //Override success
             opts.success = function (data) {
                 //Checking for Authorization error
-                if (data && data.UnAuthorizedRequest == true) {
+                if (data && data.UnAuthorizedRequest === true) {
                     self._unAuthorizedRequestHandler();
                 }
 

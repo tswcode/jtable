@@ -158,7 +158,7 @@
             var $saveButton = self._$addRecordDiv.parent().find('#AddRecordDialogSaveButton');
             var $addRecordForm = self._$addRecordDiv.find('form');
 
-            if (self._trigger("formSubmitting", null, { form: $addRecordForm, formType: 'create' }) != false) {
+            if (self._trigger("formSubmitting", null, { form: $addRecordForm, formType: 'create' }) !== false) {
                 self._setEnabledOfDialogButton($saveButton, false, self.options.messages.saving);
                 self._saveAddRecordForm($addRecordForm, $saveButton);
             }
@@ -202,7 +202,7 @@
             }
 
             var completeAddRecord = function (data) {
-                if (data.Result != 'OK') {
+                if (data.Result !== 'OK') {
                     self._showError(data.Message);
                     options.error(data);
                     return;
@@ -235,8 +235,8 @@
                     //Wait promise
                     funcResult.done(function (data) {
                         completeAddRecord(data);
-                    }).fail(function () {
-                        self._showError(self.options.messages.serverCommunicationError);
+                    }).fail(function (data) {
+                        self._showError(self.options.messages.serverCommunicationError, data);
                         options.error();
                     });
                 } else { //assume it returned the creation result
@@ -252,8 +252,8 @@
                     function (data) {
                         completeAddRecord(data);
                     },
-                    function () {
-                        self._showError(self.options.messages.serverCommunicationError);
+                    function (data) {
+                        self._showError(self.options.messages.serverCommunicationError, data);
                         options.error();
                     });
 
@@ -345,7 +345,7 @@
             var self = this;
 
             var completeAddRecord = function (data) {
-                if (data.Result != 'OK') {
+                if (data.Result !== 'OK') {
                     self._showError(data.Message);
                     self._setEnabledOfDialogButton($saveButton, true, self.options.messages.save);
                     return;
@@ -362,7 +362,11 @@
                     self._createRowFromRecord(data.Record), {
                         isNewRow: true
                     });
-                self._$addRecordDiv.dialog("close");
+                if(self.options.bootstrap3){ 
+                    self._$addRecordDiv.modal('hide');
+                } else {
+                    self._$addRecordDiv.dialog("close");
+                }
             };
 
             $addRecordForm.data('submitting', true); //TODO: Why it's used, can remove? Check it.
@@ -378,8 +382,8 @@
                     //Wait promise
                     funcResult.done(function (data) {
                         completeAddRecord(data);
-                    }).fail(function () {
-                        self._showError(self.options.messages.serverCommunicationError);
+                    }).fail(function (data) {
+                        self._showError(self.options.messages.serverCommunicationError, data);
                         self._setEnabledOfDialogButton($saveButton, true, self.options.messages.save);
                     });
                 } else { //assume it returned the creation result
@@ -395,8 +399,8 @@
                     function (data) {
                         completeAddRecord(data);
                     },
-                    function () {
-                        self._showError(self.options.messages.serverCommunicationError);
+                    function (data) {
+                        self._showError(self.options.messages.serverCommunicationError, data);
                         self._setEnabledOfDialogButton($saveButton, true, self.options.messages.save);
                     });
             }

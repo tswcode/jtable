@@ -64,7 +64,7 @@
             	/*TODO: Update to Edit Form attributes*/
             	
             	var rndID = 'createModal' + Math.floor((Math.random()*10000)+1);
-            	var arBtn = $('<button id="EditRecordDialogSaveButton" type="button" class="btn btn-primary">' + self.options.messages.save + '</button>');
+            	var arBtn = $('<button id="EditDialogSaveButton" type="button" class="btn btn-primary">' + self.options.messages.save + '</button>');
             	//Bootstrap Modal
             	self._$editDiv.addClass('modal fade').attr('id',rndID).attr('role','dialog').attr('tabindex','-1').attr('aria-hidden','true').attr('aria-labelledby',rndID+'Title');
             	$('<div />').addClass('modal-dialog')
@@ -87,19 +87,19 @@
             	.appendTo(self._$editDiv);
             	
             	self._$editDiv.on('hidden.bs.modal', function () {
-                    var $addRecordForm = self._$addRecordDiv.find('form').first();
-                    var $saveButton = $('#EditRecordDialogSaveButton');
-                    self._trigger("formClosed", null, { form: $addRecordForm, formType: 'create' });
+                    var $editForm = self._$editDiv.find('form').first();
+                    var $saveButton = $('#EditDialogSaveButton');
+                    self._trigger("formClosed", null, { form: $editForm, formType: 'edit' });
                     self._setEnabledOfDialogButton($saveButton, true, self.options.messages.save);
-                    $addRecordForm.remove();
+                    $editForm.remove();
                 });
 
                 arBtn.on('click',function(){
                     //var $saveButton = $('#AddRecordDialogSaveButton');
-                    var $addRecordForm = self._$editDiv.find('form');
-                    if (self._trigger("formSubmitting", null, { form: $addRecordForm, formType: 'create' }) !== false) {
+                    var $editForm = self._$editDiv.find('form');
+                    if (self._trigger("formSubmitting", null, { form: $editForm, formType: 'edit' }) !== false) {
                       self._setEnabledOfDialogButton(arBtn, false, self.options.messages.saving);
-                      self._saveAddRecordForm($addRecordForm, arBtn);
+                      self._saveEditForm($editForm, arBtn);
                     }
                 });
             }else{
@@ -156,13 +156,17 @@
             
             //row maybe removed by another source, if so, do nothing
             if (self._$editingRow.hasClass('jtable-row-removed')) {
-                self._$editDiv.dialog('close');
+                if(self.options.bootstrap3){ 
+                    self._$editDiv.modal('hide');
+                } else {
+                    self._$editDiv.dialog("close");
+                }
                 return;
             }
 
             var $saveButton = self._$editDiv.parent().find('#EditDialogSaveButton');
             var $editForm = self._$editDiv.find('form');
-            if (self._trigger("formSubmitting", null, { form: $editForm, formType: 'edit', row: self._$editingRow }) != false) {
+            if (self._trigger("formSubmitting", null, { form: $editForm, formType: 'edit', row: self._$editingRow }) !== false) {
                 self._setEnabledOfDialogButton($saveButton, false, self.options.messages.saving);
                 self._saveEditForm($editForm, $saveButton);
             }
@@ -213,7 +217,7 @@
             }
 
             var completeEdit = function (data) {
-                if (data.Result != 'OK') {
+                if (data.Result === 'OK') {
                     self._showError(data.Message);
                     options.error(data);
                     return;
@@ -242,8 +246,8 @@
                     //Wait promise
                     funcResult.done(function (data) {
                         completeEdit(data);
-                    }).fail(function () {
-                        self._showError(self.options.messages.serverCommunicationError);
+                    }).fail(function (data) {
+                        self._showError(self.options.messages.serverCommunicationError, data);
                         options.error();
                     });
                 } else { //assume it returned the creation result
@@ -259,8 +263,8 @@
                     function (data) {
                         completeEdit(data);
                     },
-                    function () {
-                        self._showError(self.options.messages.serverCommunicationError);
+                    function (data) {
+                        self._showError(self.options.messages.serverCommunicationError, data);
                         options.error();
                     });
 
@@ -400,14 +404,14 @@
         *************************************************************************/
         _saveEditForm: function ($editForm, $saveButton) {
             var self = this;
-            
+                        
             var completeEdit = function (data) {
-                if (data.Result != 'OK') {
+                if (data.Result !== 'OK') {
                     self._showError(data.Message);
                     self._setEnabledOfDialogButton($saveButton, true, self.options.messages.save);
                     return;
                 }
-
+                
                 var record = self._$editingRow.data('record');
 
                 self._updateRecordValuesFromForm(record, $editForm);
@@ -421,8 +425,11 @@
                 if (self.options.animationsEnabled) {
                     self._showUpdateAnimationForRow(self._$editingRow);
                 }
-
-                self._$editDiv.dialog("close");
+                if(self.options.bootstrap3){ 
+                    self._$editDiv.modal('hide');
+                } else {
+                    self._$editDiv.dialog("close");
+                }
             };
 
 
@@ -437,8 +444,8 @@
                     //Wait promise
                     funcResult.done(function (data) {
                         completeEdit(data);
-                    }).fail(function () {
-                        self._showError(self.options.messages.serverCommunicationError);
+                    }).fail(function (data) {
+                        self._showError(self.options.messages.serverCommunicationError, data);
                         self._setEnabledOfDialogButton($saveButton, true, self.options.messages.save);
                     });
                 } else { //assume it returned the creation result
@@ -454,8 +461,8 @@
                     function(data) {
                         completeEdit(data);
                     },
-                    function() {
-                        self._showError(self.options.messages.serverCommunicationError);
+                    function(data) {
+                        self._showError(self.options.messages.serverCommunicationError, data);
                         self._setEnabledOfDialogButton($saveButton, true, self.options.messages.save);
                     });
             }
@@ -478,6 +485,14 @@
         _getValueForRecordField: function (record, fieldName) {
             var field = this.options.fields[fieldName];
             var fieldValue = record[fieldName];
+            if(fieldName.indexOf('.') !== -1) {
+                var names = fieldName.split(".");
+                var currentRecord = record;
+                for(var i = 0; i < names.length; i++) {
+                    currentRecord = currentRecord[names[i]];
+                }
+                fieldValue = currentRecord;
+            }
             if (field.type === 'date') {
                 return this._getDisplayTextForDateRecordField(field, fieldValue);
             } else {
@@ -492,7 +507,7 @@
             var $columns = $tableRow.find('td');
             for (var i = 0; i < this._columnList.length; i++) {
                 var displayItem = this._getDisplayTextForRecordField(record, this._columnList[i]);
-                if ((displayItem != "") && (displayItem == 0)) displayItem = "0";
+                if ((displayItem !== "") && (displayItem === 0)) displayItem = "0";
                 $columns.eq(this._firstDataColumnOffset + i).html(displayItem || '');
             }
 
