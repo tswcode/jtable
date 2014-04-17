@@ -485,10 +485,13 @@
         _getValueForRecordField: function (record, fieldName) {
             var field = this.options.fields[fieldName];
             var fieldValue = record[fieldName];
-            if(fieldName.indexOf('.') !== -1) {
+            if(typeof fieldValue === "undefined" && fieldName.indexOf('.') !== -1) {
                 var names = fieldName.split(".");
                 var currentRecord = record;
                 for(var i = 0; i < names.length; i++) {
+                    if(typeof currentRecord === "undefined") {
+                        break;
+                    }
                     currentRecord = currentRecord[names[i]];
                 }
                 fieldValue = currentRecord;
