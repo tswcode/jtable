@@ -261,7 +261,7 @@
         *************************************************************************/
         _createCheckboxForField: function (field, fieldName, value) {
             var self = this;
-            
+
             //If value is undefined, get unchecked state's value
             if (typeof value === "undefined") {
                 value = self._getCheckBoxPropertiesForFieldByState(fieldName, false).Value;
