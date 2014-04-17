@@ -30,10 +30,11 @@
             loadingAnimationDelay: 500,
             saveUserPreferences: true,
             jqueryuiTheme: false,
-            bootstrap3:false, //Do NOT use with jqueryuiTheme: true
+            bootstrap3: true, //Do NOT use with jqueryuiTheme: true
             bs3PanelClass: 'panel-info',
             bs3FormClass:'horizontal', //Options are '' Default, 'inline' ==> form-inline, 'horizontal' ==> 'form-horizontal' (Option bootstrap3 must be true)
             bs3UseFormGroup: true, //Adds form-group class to input divs
+            bs3NavBtnClass: 'btn-warning',
             bs3CancelBtnClass:'btn-default',  //Class to add to Cancel/Close buttons
             bs3OkBtnClass:'btn-primary', //Class to add to Ok/Save buttons
             
@@ -996,6 +997,14 @@
                     parseInt(dateString.substr(14, 2), 10),
                     parseInt(dateString.substr(17, 2), 10)
                 );
+            } else if (dateString.length === 16) { //Format: 01.01.2011 20:32
+                return new Date(
+                    parseInt(dateString.substr(6, 4), 10),
+                    parseInt(dateString.substr(3, 2), 10) - 1,
+                    parseInt(dateString.substr(0, 2, 10)),
+                    parseInt(dateString.substr(11, 2), 10),
+                    parseInt(dateString.substr(14, 2), 10)
+                );
             } else {
                 this._logWarn('Given date is not properly formatted: ' + dateString);
                 return 'format error!';
@@ -1043,7 +1052,7 @@
                 }
             } else {
                 var $toolBarItem = $('<button></button>')
-                    .addClass('jtable-toolbar-item navbar-btn btn btn-primary')
+                    .addClass('jtable-toolbar-item navbar-btn btn ' + self.options.bs3NavBtnClass)
                     .appendTo(this._$toolbarDiv);
             }
 
