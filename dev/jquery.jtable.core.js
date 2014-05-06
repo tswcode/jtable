@@ -3,7 +3,7 @@
 *************************************************************************/
 (function ($) {
     var now = new Date();
-	var unloadingPage;
+    var unloadingPage;
     
     $(window).on('beforeunload', function () {
         unloadingPage = true;
@@ -255,14 +255,21 @@
 
             if (self.options.showCloseButton) {
 
-                var $textSpan = $('<span />')
-                    .html(self.options.messages.close);
+                var $textSpan = $('<span />').html(self.options.messages.close);
+                    
+                if(self.options.bootstrap3) {
+                    $textSpan.addClass('glyphicon glyphicon-remove').html('');
+                }
+
+                var $toolBarDiv = $('<div></div>')
+                    .addClass('jtable-toolbar pull-right')
+                    .appendTo($titleTextDiv);
 
                 $('<button></button>')
-                    .addClass('jtable-command-button jtable-close-button')
+                    .addClass('jtable-command-button jtable-close-button navbar-btn btn ' + self.options.bs3NavBtnClass)
                     .attr('title', self.options.messages.close)
                     .append($textSpan)
-                    .appendTo($titleDiv)
+                    .appendTo($toolBarDiv)
                     .click(function (e) {
                         e.preventDefault();
                         e.stopPropagation();
@@ -1006,6 +1013,15 @@
                     parseInt(dateString.substr(0, 2, 10)),
                     parseInt(dateString.substr(11, 2), 10),
                     parseInt(dateString.substr(14, 2), 10)
+                );
+            } else if (dateString.length === 29) { //Format: 2011-01-01T20:32:42.000+01:00
+                return new Date(
+                    parseInt(dateString.substr(0, 4), 10),
+                    parseInt(dateString.substr(5, 2), 10) - 1,
+                    parseInt(dateString.substr(8, 2, 10)),
+                    parseInt(dateString.substr(11, 2), 10),
+                    parseInt(dateString.substr(14, 2), 10),
+                    parseInt(dateString.substr(17, 2), 10)
                 );
             } else {
                 this._logWarn('Given date is not properly formatted: ' + dateString);
