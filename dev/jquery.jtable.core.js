@@ -1184,6 +1184,10 @@
                 makeVisible();
             }
         },
+        
+        showBusy: function() {
+            this._showBusy(this.options.messages.loadingMessage, this.options.loadingAnimationDelay);
+        },
 
         /* Hides busy indicator and unblocks table UI.
         *************************************************************************/
